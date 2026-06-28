@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { showSuccess, showError } from '../components/Toast';
+import { db } from '../api/db';
 
 /* ─────────────────────────────────────────────────────────
    Add Item Form (inline, toggled by "Add New Item" button)
@@ -377,15 +378,38 @@ export default function Inventory() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null); // item to confirm-delete
 
-  const { data: items = [], isLoading, isError } = useQuery({
+  const [localItems, setLocalItems] = useState([]);
+  const [localLoaded, setLocalLoaded] = useState(false);
+
+  // 1. Initial fast local load from IndexedDB cache
+  useEffect(() => {
+    db.inventory.toArray().then(cached => {
+      if (cached.length > 0) {
+        setLocalItems(cached);
+      }
+      setLocalLoaded(true);
+    });
+  }, []);
+
+  // 2. Background sync via react-query
+  const { data: serverItems, isLoading: isQueryLoading, isError } = useQuery({
     queryKey: ['items'],
     queryFn: async () => {
       const { data } = await apiClient.get('/items');
+      
+      // Update local db index quietly
+      await db.inventory.clear();
+      if (data && data.length > 0) {
+        await db.inventory.bulkAdd(data);
+      }
       return data;
     },
     staleTime: 1000 * 30,
     refetchOnWindowFocus: true,
   });
+
+  const items = serverItems ?? localItems;
+  const isLoading = !localLoaded && isQueryLoading;
 
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/items/${id}`),
