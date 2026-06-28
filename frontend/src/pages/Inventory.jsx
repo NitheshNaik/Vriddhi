@@ -243,8 +243,16 @@ function CatalogRow({ item, onDeleteRequest }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {item.photo ? (
-          <img src={item.photo} alt={item.name} loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img 
+            src={item.photo} 
+            alt={item.name} 
+            loading="lazy"
+            onError={(e) => {
+              // Fallback placeholder icon logic if a string is corrupt or missing
+              e.target.src = 'https://placehold.co/150?text=No+Image';
+            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
         ) : (
           <span className="material-symbols-outlined" style={{ fontSize: 22, color: 'var(--secondary-fixed-dim)' }}>inventory_2</span>
         )}
@@ -381,14 +389,35 @@ export default function Inventory() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/items/${id}`),
+
+    // ── Optimistic delete: remove item instantly before server confirms ──────
+    onMutate: async (id) => {
+      // Cancel any in-flight item refetches to avoid overwriting our update
+      await queryClient.cancelQueries({ queryKey: ['items'] });
+      // Snapshot the current list so we can rollback on error
+      const previousItems = queryClient.getQueryData(['items']);
+      // Immediately remove the item from the cache
+      queryClient.setQueryData(['items'], (old) => old?.filter(i => i._id !== id) ?? []);
+      return { previousItems };
+    },
+
     onSuccess: () => {
       showSuccess(`"${deleteTarget?.name}" removed from catalog.`);
-      queryClient.invalidateQueries({ queryKey: ['items'] });
       setDeleteTarget(null);
     },
-    onError: (err) => {
+
+    onError: (err, _id, ctx) => {
+      // Rollback cache to snapshot if the API call failed
+      if (ctx?.previousItems) {
+        queryClient.setQueryData(['items'], ctx.previousItems);
+      }
       showError(err.response?.data?.message || 'Failed to delete item.');
       setDeleteTarget(null);
+    },
+
+    // Reconcile with server after either success or failure
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
     },
   });
 

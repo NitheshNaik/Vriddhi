@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 1000 * 30,
+      staleTime: 5 * 60 * 1000, // 5 minutes — serve from cache on tab navigation
     },
   },
 });

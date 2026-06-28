@@ -22,4 +22,8 @@ const itemSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+// ── Performance Index ─────────────────────────────────────────────────────────
+// Accelerates GET /api/items (filter by shopId, sort newest-first by createdAt)
+itemSchema.index({ shopId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Item', itemSchema);

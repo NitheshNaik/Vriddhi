@@ -163,8 +163,16 @@ function ItemCard({ item, onSell }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {item.photo ? (
-                <img src={item.photo} alt={item.name} loading="lazy"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img 
+                  src={item.photo} 
+                  alt={item.name} 
+                  loading="lazy"
+                  onError={(e) => {
+                    // Fallback placeholder icon logic if a string is corrupt or missing
+                    e.target.src = 'https://placehold.co/150?text=No+Image';
+                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
               ) : (
                 <span className="material-symbols-outlined"
                   style={{ fontSize: 24, color: 'var(--secondary-fixed-dim)' }}>
@@ -292,8 +300,35 @@ export default function Dashboard() {
     onSuccess: (_, vars) => {
       const item = items.find(i => i._id === vars.itemId);
       showSuccess(`Sale recorded: ${vars.quantitySold}× ${item?.name || 'item'} (${vars.paymentMethod.toUpperCase()})`);
-      queryClient.invalidateQueries({ queryKey: ['items'] });
+
+      // ── Optimistic analytics update ───────────────────────────────────────
+      // Immediately reflect the sale in the Reports cache so the user sees
+      // updated revenue figures without waiting for a network round-trip.
+      const addedRevenue = vars.pricePerUnit * vars.quantitySold;
+      queryClient.setQueryData(['analytics'], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          today: {
+            revenue: (old.today?.revenue || 0) + addedRevenue,
+            count:   (old.today?.count   || 0) + vars.quantitySold,
+          },
+          week: {
+            revenue: (old.week?.revenue  || 0) + addedRevenue,
+            count:   (old.week?.count    || 0) + vars.quantitySold,
+          },
+          month: {
+            revenue: (old.month?.revenue || 0) + addedRevenue,
+            count:   (old.month?.count   || 0) + vars.quantitySold,
+          },
+        };
+      });
+
+      // Invalidate so next background refetch corrects any rounding drift
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      // Invalidate historical views so they refetch on next visit
+      queryClient.invalidateQueries({ queryKey: ['historical-week'] });
+      queryClient.invalidateQueries({ queryKey: ['historical-month'] });
     },
     onError: (err) => showError(err.response?.data?.message || 'Failed to record sale.'),
   });

@@ -16,13 +16,29 @@ const upload = multer({
   },
 });
 
-// GET /api/items - fetch all items for the authenticated shop
+// GET /api/items - fetch all items (photo excluded for performance)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const items = await Item.find({ shopId: req.user.shopId }).sort({ createdAt: -1 });
+    // Fetch all items including photo to satisfy frontend grid requirements
+    const items = await Item.find({ shopId: req.user.shopId })
+      .sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch items.' });
+  }
+});
+
+// GET /api/items/:id/photo - lazy-load a single item's photo on demand
+router.get('/:id/photo', authMiddleware, async (req, res) => {
+  try {
+    const item = await Item.findOne(
+      { _id: req.params.id, shopId: req.user.shopId },
+      'photo'
+    );
+    if (!item) return res.status(404).json({ message: 'Item not found.' });
+    res.json({ photo: item.photo || '' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch photo.' });
   }
 });
 

@@ -5,6 +5,8 @@
   "scripts": {
     "backend": "cd backend && node server.js",
     "frontend": "cd frontend && npm run dev",
-    "dev": "start \"Backend\" cmd /k \"cd backend && node server.js\" && start \"Frontend\" cmd /k \"cd frontend && npm run dev\""
+    "dev": "start \"Backend\" cmd /k \"cd backend && node server.js\" && start \"Frontend\" cmd /k \"cd frontend && npm run dev\"",
+    "build:backend": "cd backend && npm install",
+    "start": "cd backend && node server.js"
   }
 }
