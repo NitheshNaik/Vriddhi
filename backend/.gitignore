@@ -1,0 +1,20 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Environment secrets ───────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ── Build output ──────────────────────────────────────────────────────────────
+dist/
+build/
+
+# ── Upload storage (if disk storage is ever enabled) ──────────────────────────
+uploads/
+
+# ── OS & editor artifacts ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log

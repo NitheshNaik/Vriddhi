@@ -1,0 +1,10 @@
+{
+  "name": "shopkeeper-tracker",
+  "version": "1.0.0",
+  "description": "ShopKeeper Inventory & Sales Tracker — monorepo root",
+  "scripts": {
+    "backend": "cd backend && node server.js",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "start \"Backend\" cmd /k \"cd backend && node server.js\" && start \"Frontend\" cmd /k \"cd frontend && npm run dev\""
+  }
+}
