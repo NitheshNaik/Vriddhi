@@ -101,7 +101,7 @@ function OtpDialog({ email, formData, onSuccess, onClose }) {
         password: formData.password,
         otp: otp.trim(),
       });
-      localStorage.setItem('sk_token', data.token);
+      localStorage.setItem('token', data.token);
       localStorage.setItem('sk_user', JSON.stringify(data.user));
       syncFromStorage();
       onSuccess(data);

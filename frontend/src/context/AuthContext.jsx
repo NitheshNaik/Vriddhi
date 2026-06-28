@@ -7,11 +7,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('sk_user')); } catch { return null; }
   });
-  const [token, setToken] = useState(() => localStorage.getItem('sk_token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   const login = useCallback(async (email, password) => {
     const { data } = await apiClient.post('/auth/login', { email, password });
-    localStorage.setItem('sk_token', data.token);
+    localStorage.setItem('token', data.token);
     localStorage.setItem('sk_user', JSON.stringify(data.user));
     setToken(data.token);
     setUser(data.user);
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   // then calls syncFromStorage to bring React state in sync.
   const syncFromStorage = useCallback(() => {
     try {
-      const t = localStorage.getItem('sk_token');
+      const t = localStorage.getItem('token');
       const u = JSON.parse(localStorage.getItem('sk_user'));
       setToken(t);
       setUser(u);
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('sk_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('sk_user');
     setToken(null);
     setUser(null);
