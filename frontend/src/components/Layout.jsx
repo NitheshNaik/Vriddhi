@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import apiClient from '../api/client';
@@ -40,10 +40,23 @@ export default function Layout({ children }) {
     <>
       {/* ── Top App Bar ───────────────────────────────────── */}
       <header className="top-app-bar">
-        <div className="top-app-bar__title">
-          <span className="material-symbols-outlined" style={{ fontSize: 22, color: 'var(--primary)', verticalAlign: 'middle', marginRight: 6 }}>storefront</span>
-          Vriddhi
-        </div>
+        <Link 
+          to="/" 
+          className="top-app-bar__title d-flex align-items-center gap-2 text-decoration-none" 
+          style={{ color: 'inherit' }}
+        >
+          <img 
+            src="/icon-192.png" 
+            alt="Vriddhi Logo" 
+            style={{ 
+              height: '34px', 
+              width: '34px', 
+              objectFit: 'contain' 
+            }} 
+            className="d-inline-block align-top logo-brand"
+          />
+          <span className="fw-bold">Vriddhi</span>
+        </Link>
 
         {/* ── Navbar avatar ─────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center' }}>

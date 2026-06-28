@@ -88,10 +88,8 @@ export default function Profile() {
   ];
 
   return (
-    <>
-      {/* ── Main profile view ─────────────────────────────── */}
-      <>
-        {/* ── Avatar + Name ──────────────────────────────── */}
+    <div className="container-fluid w-100 fade-in px-0" style={{ margin: '0 auto' }}>
+      {/* ── Avatar + Name ──────────────────────────────── */}
           <section className="text-center mb-4">
             {isLoading ? (
               <div className="sk-spinner" style={{ margin: '0 auto 16px' }} />
@@ -223,14 +221,14 @@ export default function Profile() {
             /* ── Shop Details Card ──────────────────────── */
             <section className="mb-3">
               <div className="settings-section-title">Shop Details</div>
-              <div className="sk-card overflow-hidden mb-1">
+              <div className="sk-card overflow-hidden mb-1 w-100">
                 {menuItems.map((item, idx) => (
-                  <div key={idx} className="settings-row">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div key={idx} className="settings-row w-100 p-3" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
                       <span className="material-symbols-outlined" style={{ fontSize: 20, color: 'var(--primary)' }}>{item.icon}</span>
-                      <span className="settings-row__label">{item.label}</span>
+                      <span className="settings-row__label" style={{ fontWeight: 600 }}>{item.label}</span>
                     </div>
-                    <span className="settings-row__value">{item.value || '—'}</span>
+                    <span className="settings-row__value" style={{ textAlign: 'right', wordBreak: 'break-word', color: 'var(--on-surface-variant)' }}>{item.value || '—'}</span>
                   </div>
                 ))}
               </div>
@@ -249,7 +247,7 @@ export default function Profile() {
           {/* ── App Settings Card ──────────────────────────── */}
           <section className="mb-3">
             <div className="settings-section-title">App</div>
-            <div className="sk-card overflow-hidden">
+            <div className="sk-card overflow-hidden w-100">
               {appItems.map((item, idx) => {
                 const handleClick = () => {
                   if (item.label === 'Help & Support') navigate('/profile/help');
@@ -263,8 +261,8 @@ export default function Profile() {
                 return (
                   <div
                     key={idx}
-                    className="settings-row"
-                    style={{ cursor: 'pointer' }}
+                    className="settings-row w-100 p-3"
+                    style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     onClick={handleClick}
                     role="button"
                     tabIndex={0}
@@ -312,7 +310,6 @@ export default function Profile() {
         <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--secondary-fixed-dim)', marginTop: 8 }}>
           Vriddhi v1.0.0 · Smart Business Ledger
         </p>
-      </>
-    </>
+    </div>
   );
 }
