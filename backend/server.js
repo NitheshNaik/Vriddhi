@@ -12,14 +12,24 @@ const PORT = process.env.PORT || 5000;
 // ── Security headers (helmet) ──────────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS — locked to FRONTEND_URL env var ─────────────────────────────────
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173']
-  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const allowedOrigins = [
+  'http://localhost:5173',               // Local Vite Development
+  'https://vriddhi-mauve.vercel.app'     // Live Production Frontend on Vercel
+];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests) 
+    // or requests matching our explicit allowed whitelist
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by Vriddhi Production CORS Security Firewall'));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // ── Rate limiting — 100 requests per 15 min per IP ────────────────────────
