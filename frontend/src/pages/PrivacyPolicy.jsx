@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /* ── Core Data Principles ─────────────────────────────── */
 const PRINCIPLES = [
@@ -137,7 +138,8 @@ function PolicyItem({ section, isOpen, onToggle }) {
 }
 
 /* ── Privacy Policy View ──────────────────────────────── */
-export default function PrivacyPolicy({ onBack }) {
+export default function PrivacyPolicy() {
+  const navigate = useNavigate();
   const [openSection, setOpenSection] = useState(null);
   const [purgeRequested, setPurgeRequested] = useState(false);
 
@@ -159,7 +161,7 @@ export default function PrivacyPolicy({ onBack }) {
       }}>
         <button
           id="privacy-back-btn"
-          onClick={onBack}
+          onClick={() => navigate('/profile')}
           style={{
             background: 'var(--surface-container)',
             border: 'none', cursor: 'pointer',

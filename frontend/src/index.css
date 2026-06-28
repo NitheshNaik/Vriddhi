@@ -78,10 +78,17 @@ body {
   color: var(--on-surface);
   margin: 0;
   padding: 0;
-  min-height: 100dvh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding-bottom: var(--bottom-nav-height);
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 /* --- Bootstrap Overrides --- */
@@ -129,11 +136,12 @@ body {
 /* --- Layout Utilities --- */
 .page-content {
   padding-top: 88px;
-  padding-bottom: calc(var(--bottom-nav-height) + 16px);
+  padding-bottom: 70px !important;
   max-width: 520px;
   margin: 0 auto;
   padding-left: 16px;
   padding-right: 16px;
+  flex: 1;
 }
 
 /* --- Top App Bar --- */

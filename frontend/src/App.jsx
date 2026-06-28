@@ -9,6 +9,9 @@ import Reports from './pages/Reports';
 import WeeklyBreakdownPage from './pages/WeeklyBreakdownPage';
 import MonthlyBreakdownPage from './pages/MonthlyBreakdownPage';
 import Profile from './pages/Profile';
+import HelpSupport from './pages/HelpSupport';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import AppVersion from './pages/AppVersion';
 import Inventory from './pages/Inventory';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -80,6 +83,9 @@ export default function App() {
       <Route path="/reports/month" element={<ProtectedRoute><MonthlyBreakdownPage /></ProtectedRoute>} />
       <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/profile/help" element={<ProtectedRoute><HelpSupport /></ProtectedRoute>} />
+      <Route path="/profile/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
+      <Route path="/profile/version" element={<ProtectedRoute><AppVersion /></ProtectedRoute>} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

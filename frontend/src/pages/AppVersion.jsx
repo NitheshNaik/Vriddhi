@@ -1,4 +1,5 @@
 /* ── App Version & System Info View ──────────────────── */
+import { useNavigate } from 'react-router-dom';
 
 /* ── Build specification data ────────────────────────── */
 const BUILD_SPECS = [
@@ -80,7 +81,8 @@ function MilestoneItem({ icon, title, body }) {
 }
 
 /* ── AppVersion View ──────────────────────────────────── */
-export default function AppVersion({ onBack }) {
+export default function AppVersion() {
+  const navigate = useNavigate();
   return (
     <div className="fade-in">
 
@@ -92,7 +94,7 @@ export default function AppVersion({ onBack }) {
       }}>
         <button
           id="appversion-back-btn"
-          onClick={onBack}
+          onClick={() => navigate('/profile')}
           style={{
             background: 'var(--surface-container)',
             border: 'none', cursor: 'pointer',

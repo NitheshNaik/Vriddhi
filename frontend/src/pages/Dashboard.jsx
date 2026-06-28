@@ -9,18 +9,25 @@ function PaymentModal({ onConfirm, onCancel }) {
   const [method, setMethod] = useState('cash');
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.45)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '0 24px',
-    }}>
+    <>
+      {/* Backdrop overlay */}
       <div style={{
+        position: 'fixed', inset: 0, zIndex: 1040,
+        background: 'rgba(0,0,0,0.45)',
+      }}></div>
+      
+      {/* Modal Container */}
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 1050,
         background: 'var(--surface-container-lowest)',
         borderRadius: 'var(--radius-xl)',
         padding: '24px 20px 24px',
-        width: '100%',
-        maxWidth: 340,
+        width: '90%',
+        maxWidth: 360,
         boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
         animation: 'popIn 0.2s cubic-bezier(.34,1.56,.64,1)',
       }}>
@@ -123,7 +130,7 @@ function PaymentModal({ onConfirm, onCancel }) {
           to   { transform: translateY(0);    opacity: 1; }
         }
       `}</style>
-    </div>
+    </>
   );
 }
 

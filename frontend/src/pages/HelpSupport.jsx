@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /* ── Help & Support FAQ data ──────────────────────────── */
 const FAQS = [
@@ -97,7 +98,8 @@ function FaqItem({ faq, isOpen, onToggle }) {
 }
 
 /* ── Help & Support View ──────────────────────────────── */
-export default function HelpSupport({ onBack }) {
+export default function HelpSupport() {
+  const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
 
   const toggleFaq = (idx) => setOpenFaq(prev => (prev === idx ? null : idx));
@@ -118,7 +120,7 @@ export default function HelpSupport({ onBack }) {
       }}>
         <button
           id="help-back-btn"
-          onClick={onBack}
+          onClick={() => navigate('/profile')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',

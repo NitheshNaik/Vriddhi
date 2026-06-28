@@ -4,14 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { showSuccess, showError } from '../components/Toast';
-import HelpSupport from './HelpSupport';
-import PrivacyPolicy from './PrivacyPolicy';
-import AppVersion from './AppVersion';
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, logout, updateLocalUser, setIsAuthenticated } = useAuth();
-  const [view, setView] = useState('main'); // 'main' | 'help' | 'privacy' | 'appversion'
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ shopName: '', ownerName: '' });
   const [avatarHover, setAvatarHover] = useState(false);
@@ -93,19 +89,9 @@ export default function Profile() {
 
   return (
     <>
-      {/* ── Help & Support sub-view ──────────────────────── */}
-      {view === 'help' && <HelpSupport onBack={() => setView('main')} />}
-
-      {/* ── Privacy Policy sub-view ───────────────────────── */}
-      {view === 'privacy' && <PrivacyPolicy onBack={() => setView('main')} />}
-
-      {/* ── App Version sub-view ──────────────────────────── */}
-      {view === 'appversion' && <AppVersion onBack={() => setView('main')} />}
-
       {/* ── Main profile view ─────────────────────────────── */}
-      {view === 'main' && (
-        <>
-          {/* ── Avatar + Name ──────────────────────────────── */}
+      <>
+        {/* ── Avatar + Name ──────────────────────────────── */}
           <section className="text-center mb-4">
             {isLoading ? (
               <div className="sk-spinner" style={{ margin: '0 auto 16px' }} />
@@ -266,9 +252,9 @@ export default function Profile() {
             <div className="sk-card overflow-hidden">
               {appItems.map((item, idx) => {
                 const handleClick = () => {
-                  if (item.label === 'Help & Support') setView('help');
-                  if (item.label === 'Privacy Policy')  setView('privacy');
-                  if (item.label === 'App Version')     setView('appversion');
+                  if (item.label === 'Help & Support') navigate('/profile/help');
+                  if (item.label === 'Privacy Policy')  navigate('/profile/privacy');
+                  if (item.label === 'App Version')     navigate('/profile/version');
                 };
                 const rowId =
                   item.label === 'Help & Support' ? 'help-support-row' :
@@ -323,11 +309,10 @@ export default function Profile() {
             Sign Out
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--secondary-fixed-dim)', marginTop: 8 }}>
-            Vriddhi v1.0.0 · Smart Business Ledger
-          </p>
-        </>
-      )}
+        <p style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--secondary-fixed-dim)', marginTop: 8 }}>
+          Vriddhi v1.0.0 · Smart Business Ledger
+        </p>
+      </>
     </>
   );
 }

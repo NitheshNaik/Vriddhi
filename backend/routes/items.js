@@ -21,6 +21,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     // Fetch all items including photo to satisfy frontend grid requirements
     const items = await Item.find({ shopId: req.user.shopId })
+      .select('name sellingPrice photo')
       .sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {
