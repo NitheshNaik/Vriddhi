@@ -12,16 +12,20 @@ const PORT = process.env.PORT || 5000;
 // ── Security headers (helmet) ──────────────────────────────────────────────
 app.use(helmet());
 
-const allowedOrigins = [
-  'http://localhost:5173',               // Local Vite Development
-  'https://vriddhi-mauve.vercel.app'     // Live Production Frontend on Vercel
-];
-
+// ── Dynamic CORS configuration supporting Vercel Wildcards ────────────────
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests) 
-    // or requests matching our explicit allowed whitelist
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // 1. Allow requests with no origin (like mobile apps, Postman, or curl)
+    // 2. Allow local Vite development environments (e.g., localhost:5173, localhost:3000)
+    if (!origin || origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+
+    // 3. Regex to match your main production domain AND all dynamic Vercel preview/branch builds
+    // Captures domains starting with 'https://vriddhi-' and ending with '.vercel.app'
+    const isVercelDomain = /^https:\/\/vriddhi-.*\.vercel\.app$/.test(origin);
+
+    if (isVercelDomain) {
       callback(null, true);
     } else {
       callback(new Error('Blocked by Vriddhi Production CORS Security Firewall'));
@@ -44,7 +48,6 @@ app.use('/api', apiLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
