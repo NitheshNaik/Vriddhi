@@ -19,9 +19,10 @@ const upload = multer({
 // GET /api/items - fetch all items (photo excluded for performance)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    // Fetch all items including photo to satisfy frontend grid requirements
+    // Fetch all items excluding the heavy photo string for fast sync
     const items = await Item.find({ shopId: req.user.shopId })
-      .select('name sellingPrice photo')
+      .select('-photo')
+      .lean()
       .sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {

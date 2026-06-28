@@ -140,6 +140,30 @@ function ItemCard({ item, onSell }) {
   const [pricePerUnit, setPricePerUnit] = useState(item.sellingPrice);
   const [showModal, setShowModal] = useState(false);
   const [selling, setSelling] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [imgLoading, setImgLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLazyImage = async () => {
+      try {
+        const response = await apiClient.get(`/items/${item._id}/photo`);
+        if (response.data && response.data.photo) {
+          setImageSrc(response.data.photo);
+        }
+      } catch (err) {
+        console.error("Failed to lazy load image for item:", item._id);
+      } finally {
+        setImgLoading(false);
+      }
+    };
+
+    if (item._id && !item.photo) {
+      fetchLazyImage();
+    } else if (item.photo) {
+      setImageSrc(item.photo);
+      setImgLoading(false);
+    }
+  }, [item._id, item.photo]);
 
   const handleConfirmSale = () => setShowModal(true);
 
@@ -169,13 +193,14 @@ function ItemCard({ item, onSell }) {
               overflow: 'hidden',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              {item.photo ? (
+              {imgLoading ? (
+                <div className="sk-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+              ) : imageSrc ? (
                 <img 
-                  src={item.photo} 
+                  src={imageSrc} 
                   alt={item.name} 
                   loading="lazy"
                   onError={(e) => {
-                    // Fallback placeholder icon logic if a string is corrupt or missing
                     e.target.src = 'https://placehold.co/150?text=No+Image';
                   }}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 

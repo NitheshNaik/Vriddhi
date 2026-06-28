@@ -208,6 +208,47 @@ function DeleteModal({ itemName, onConfirm, onCancel, isDeleting }) {
 }
 
 /* ─────────────────────────────────────────────────────────
+   Lazy Photo Component
+───────────────────────────────────────────────────────── */
+function LazyPhoto({ id, name }) {
+  const { data: photoData, isLoading } = useQuery({
+    queryKey: ['photo', id],
+    queryFn: async () => {
+      try {
+        const { data } = await apiClient.get(`/items/${id}/photo`);
+        return data.photo;
+      } catch (err) {
+        return null;
+      }
+    },
+    staleTime: Infinity, // Photos rarely change
+  });
+
+  if (isLoading) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-container-high)' }}>
+        <span className="sk-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+      </div>
+    );
+  }
+
+  if (photoData) {
+    return (
+      <img 
+        src={photoData} 
+        alt={name} 
+        loading="lazy"
+        onError={(e) => { e.target.src = 'https://placehold.co/150?text=No+Image'; }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+      />
+    );
+  }
+
+  // Fallback if no photo exists
+  return <span className="material-symbols-outlined" style={{ fontSize: 22, color: 'var(--secondary-fixed-dim)' }}>inventory_2</span>;
+}
+
+/* ─────────────────────────────────────────────────────────
    Catalog Item Row (view + inline edit + delete trigger)
 ───────────────────────────────────────────────────────── */
 function CatalogRow({ item, onDeleteRequest }) {
@@ -255,7 +296,7 @@ function CatalogRow({ item, onDeleteRequest }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />
         ) : (
-          <span className="material-symbols-outlined" style={{ fontSize: 22, color: 'var(--secondary-fixed-dim)' }}>inventory_2</span>
+          <LazyPhoto id={item._id} name={item.name} />
         )}
       </div>
 
@@ -378,21 +419,28 @@ export default function Inventory() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null); // item to confirm-delete
 
-  const [localItems, setLocalItems] = useState([]);
-  const [localLoaded, setLocalLoaded] = useState(false);
+  const [itemsData, setItemsData] = useState([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // 1. Initial fast local load from IndexedDB cache
   useEffect(() => {
-    db.inventory.toArray().then(cached => {
-      if (cached.length > 0) {
-        setLocalItems(cached);
+    const renderFromCache = async () => {
+      try {
+        const cachedItems = await db.inventory.toArray();
+        console.log("Local cache contents:", cachedItems);
+        if (cachedItems.length > 0) {
+          setItemsData(cachedItems); // Map the text fields instantly
+          setIsInitialLoading(false); // ⚡ CRITICAL: Kill the loading spinner immediately here!
+        }
+      } catch (err) {
+        console.error("Cache read error:", err);
       }
-      setLocalLoaded(true);
-    });
+    };
+    renderFromCache();
   }, []);
 
   // 2. Background sync via react-query
-  const { data: serverItems, isLoading: isQueryLoading, isError } = useQuery({
+  const { isError } = useQuery({
     queryKey: ['items'],
     queryFn: async () => {
       const { data } = await apiClient.get('/items');
@@ -402,17 +450,14 @@ export default function Inventory() {
       if (data && data.length > 0) {
         await db.inventory.bulkAdd(data);
       }
+      
+      setItemsData(data);
+      setIsInitialLoading(false); // Drop spinner when server responds if cache was empty
       return data;
     },
     staleTime: 1000 * 30,
     refetchOnWindowFocus: true,
   });
-
-  const items = serverItems ?? localItems;
-  // If local DB is not checked, show spinner.
-  // If local DB is checked but empty, wait for server query.
-  // If local DB has items, drop spinner immediately.
-  const isLoading = !localLoaded || (localItems.length === 0 && isQueryLoading);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/items/${id}`),
@@ -475,7 +520,7 @@ export default function Inventory() {
       )}
 
       {/* ── Catalog List ── */}
-      {isLoading && (
+      {isInitialLoading && (
         <div style={{ padding: '48px 0', textAlign: 'center' }}>
           <div className="sk-spinner" />
           <p style={{ color: 'var(--secondary)', fontSize: '0.8rem', marginTop: 12 }}>Loading catalog...</p>
@@ -490,7 +535,7 @@ export default function Inventory() {
         </div>
       )}
 
-      {!isLoading && !isError && items.length === 0 && (
+      {!isInitialLoading && !isError && itemsData.length === 0 && (
         <div className="empty-state">
           <span className="material-symbols-outlined empty-state__icon">inventory_2</span>
           <div className="empty-state__title">No items yet</div>
@@ -498,7 +543,7 @@ export default function Inventory() {
         </div>
       )}
 
-      {!isLoading && !isError && items.length > 0 && (
+      {!isInitialLoading && !isError && itemsData.length > 0 && (
         <div className="sk-card overflow-hidden mb-3">
           {/* List header */}
           <div style={{
@@ -511,11 +556,11 @@ export default function Inventory() {
               Product Catalog
             </span>
             <span style={{ fontSize: '0.7rem', color: 'var(--secondary)' }}>
-              {items.length} {items.length === 1 ? 'item' : 'items'}
+              {itemsData.length} {itemsData.length === 1 ? 'item' : 'items'}
             </span>
           </div>
 
-          {items.map((item, idx) => (
+          {itemsData.map((item, idx) => (
             <CatalogRow
               key={item._id}
               item={item}
