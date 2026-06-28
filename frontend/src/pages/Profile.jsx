@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +9,8 @@ import PrivacyPolicy from './PrivacyPolicy';
 import AppVersion from './AppVersion';
 
 export default function Profile() {
-  const { user, logout, updateLocalUser } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout, updateLocalUser, setIsAuthenticated } = useAuth();
   const [view, setView] = useState('main'); // 'main' | 'help' | 'privacy' | 'appversion'
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ shopName: '', ownerName: '' });
@@ -27,6 +29,12 @@ export default function Profile() {
       setForm({ shopName: data.shopName, ownerName: data.ownerName });
     },
   });
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Hard purge the stored user session key
+    setIsAuthenticated(false);        // Clear root tracking context parameters
+    navigate('/login');               // Shift UI viewport back to the logging card entry view
+  };
 
   // Start editing — prefill form
   const startEdit = () => {
@@ -307,7 +315,7 @@ export default function Profile() {
               transition: 'background 0.15s',
               marginBottom: 8,
             }}
-            onClick={logout}
+            onClick={handleLogout}
             onMouseOver={e => e.currentTarget.style.background = 'var(--error-container)'}
             onMouseOut={e => e.currentTarget.style.background = 'none'}
           >

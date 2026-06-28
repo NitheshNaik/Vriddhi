@@ -275,6 +275,18 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
+// GET /api/auth/me
+// ────────────────────────────────────────────────────────────────────────────
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    // If the authMiddleware passes, req.user payload contains the authenticated shopkeeper ID
+    res.status(200).json({ success: true, user: req.user });
+  } catch (error) {
+    res.status(401).json({ message: "Expired or invalid credentials session." });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────────────────
 // GET /api/auth/profile
 // ────────────────────────────────────────────────────────────────────────────
 router.get('/profile', authMiddleware, async (req, res) => {

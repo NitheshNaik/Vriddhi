@@ -43,8 +43,16 @@ export function AuthProvider({ children }) {
     setUser(merged);
   }, [user]);
 
+  const setIsAuthenticated = useCallback((value) => {
+    if (!value) {
+      logout();
+    } else {
+      syncFromStorage();
+    }
+  }, [logout, syncFromStorage]);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, syncFromStorage, logout, updateLocalUser, isAuth: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, syncFromStorage, logout, updateLocalUser, isAuth: !!token, setIsAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
