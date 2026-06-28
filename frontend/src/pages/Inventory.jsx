@@ -409,7 +409,10 @@ export default function Inventory() {
   });
 
   const items = serverItems ?? localItems;
-  const isLoading = !localLoaded && isQueryLoading;
+  // If local DB is not checked, show spinner.
+  // If local DB is checked but empty, wait for server query.
+  // If local DB has items, drop spinner immediately.
+  const isLoading = !localLoaded || (localItems.length === 0 && isQueryLoading);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/items/${id}`),
